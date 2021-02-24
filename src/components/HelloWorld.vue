@@ -1,58 +1,133 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <v-container fluid>
+    <v-card>
+          <v-toolbar>
+            <v-toolbar-title>
+                          Search
+            </v-toolbar-title>
+            <v-spacer></v-spacer>
+              <v-col cols="12" sm="6" md="3">
+                <v-text-field
+                  label="date" v-model="test.date"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="3">
+                <v-text-field
+                  label="applicant" v-model="test.applicant"
+                ></v-text-field>
+              </v-col>
+            <v-btn @click="dataLoader" icon>
+              <v-icon>
+                mdi-rotate-orbit
+              </v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text v-if="!dailyPatent.list.length">
+              <div><h1>검색 결과는 이곳에 로드 됩니다. 검색을 해주세요</h1>119981042713</div>
+          </v-card-text>
+          <div v-else>
+            <v-card-text>
+                          {{this.dailyPatent.list.length}} 건의 데이터가 검색 되었습니다.
+            </v-card-text>
+            <v-card-text v-for="item in this.dailyPatent.list" v-bind:key="item">
+            <!-- <ui>{{item.applicationDate}}</ui> <br>
+              <ui>{{item.applicationName}}</ui><br>
+              <ui>{{item.applicationNumber}}</ui><br>
+              <ui>{{item.astrtCont}}</ui><br>
+              <br>
+              <ui>{{item.inventionTitle}}</ui><br>
+              <ui>{{item.ipcNumber}}</ui><br>
+              <ui>{{item.openDate}}</ui><br>
+              <ui>{{item.registerStatus}}</ui><br> -->
+               <v-card
+              class="mx-auto"
+              max-width
+              >
+              <v-card-title>{{item.inventionTitle}}
+              <v-spacer></v-spacer>                  
+              <v-card-subtitle class="pb-0">{{item.applicationName}}</v-card-subtitle>
+              </v-card-title>
+              
+              <v-img
+                class="white--text align-end"
+                max-height="500"
+                max-width="500"
+                v-bind:src="item.bigDrawing"
+              ></v-img>
+
+              <v-card-text class="text--primary">
+                <div>{{item.astrtCont}}</div>
+
+                <div>{{item.ipcNumber}}</div>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  color="orange"
+                  text
+                >
+                  {{item.openDate}}
+                </v-btn>
+
+                <v-btn
+                  color="orange"
+                  text
+                >
+                  {{item.registerStatus}}
+                </v-btn>
+                <v-btn
+                  color="orange"
+                  text
+                >
+                  {{item.applicationNumber}}
+                </v-btn>
+                
+              </v-card-actions>                   
+            </v-card>
+          </v-card-text>
+          </div>
+          </v-card>
+  </v-container>
 </template>
-
 <script>
-export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
-</script>
+const { ipcRenderer } = require('electron')
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+export default {
+    data(){
+    
+    return {
+      test:{
+        date: '',
+        applicant: '',
+      },
+      dailyPatent : {
+        list : []
+      }
+    }
+  },
+  methods: {
+    dataLoader(){
+     ipcRenderer.invoke('test', this.test).then((result) => {
+       console.log(result)
+       this.dailyPatent.list = result
+      })
+    },
+    check(){
+      console.log(this.dailyPatent.list)
+      console.log(this.dailyPatent)
+    }
+
+
+  } 
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+
+document.addEventListener('keydown', (event) => {
+    if(event.keyCode==123){ //F12
+        //메인프로세스로 toggle-debug 메시지 전송 (디버그 툴 토글시켜라)
+        ipcRenderer.send('toggle-debug', 'an-argument')
+    }
+    else if(event.keyCode==116){ //F5
+        //메인프로세스로 refresh 메시지 전송 (페이지를 갱신시켜라)
+        ipcRenderer.send('refresh', 'an-argument')
+    }
+})
+</script>
